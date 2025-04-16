@@ -1,0 +1,36 @@
+<Action>
+    icon: ""
+    text: ""
+    function: None
+
+    padding: dp(25), dp(0)
+    size_hint: None, None
+    size: self.children[0].size
+
+    MDIconButton:
+        id: icon
+        icon: root.icon
+        pos_hint: {"center_x": .5, "center_y": .5}
+        opacity: 0
+        on_release: root.function()
+
+    MDRoundFlatButton:
+        id: text
+        text: root.text
+        pos_hint: {"center_x": .5, "center_y": .5}
+        opacity: 0
+        on_release: root.function()
+        line_color: 1,1,1,1
+        text_color: 1,1,1,1
+
+    MDRoundFlatIconButton:
+        id: icon_text
+        icon: root.icon
+        text: root.text
+        pos_hint: {"center_x": .5, "center_y": .5}
+        line_color: 1,1,1,1
+        text_color: 1,1,1,1
+        icon_color: 1,1,1,1
+
+        opacity: 0
+        on_release: root.function()
