@@ -1,3 +1,31 @@
 <Interface>
-    id: "interface"
+    id: interface
     orientation: "vertical"
+
+    md_bg_color: 1, 1, 1, 1
+
+    MDFloatLayout:
+        id: ground
+
+        MDBoxLayout:
+            id: whole
+            orientation: "vertical"
+
+            MDBoxLayout:
+                id: top_half
+                orientation: "vertical"
+                md_bg_color: 0, 0, 1, 1
+
+            MDBoxLayout:
+                id: bottom_half
+                orientation: "horizontal"
+
+                MDBoxLayout:
+                    id: right_quater
+                    orientation: "horizontal"
+                    md_bg_color: 0, 1, 0, 1
+
+                MDBoxLayout:
+                    id: right_quater
+                    orientation: "horizontal"
+                    md_bg_color: 1, 0, 0, 1

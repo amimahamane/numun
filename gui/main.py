@@ -5,6 +5,7 @@ from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
+
 Builder.load_file("imports.kv")
 
 class Manager(ScreenManager):
@@ -17,27 +18,32 @@ class Main(MDApp):
 
         self.manager = None
         self.history = []
+        self.monitor = None
 
     def build(self):
+        self.set_window()
+
         self.manager = Manager()
-
         return self.manager
-
-    def on_start(self):
-        monitor = self.get_current_monitor()
-
-        width = monitor["width"]
-        height = monitor["height"]
-
-        Window.size = (width, height)
-        Window.top = 0
-        Window.left = 0
-        Window.fullscreen = True
 
 
     def switch_screen(self, origin, target):
         self.history.append(origin)
         self.manager.current = target
+
+
+    def set_window(self):
+        monitor = self.get_current_monitor()
+
+        width = monitor["width"]
+        height = monitor["height"]
+
+        Window.size = (height, height)
+        Window.top = 0
+        Window.left = 0
+
+        self.monitor = monitor
+
 
     @staticmethod
     def get_current_monitor():
@@ -55,5 +61,6 @@ class Main(MDApp):
                 }
 
         return None
+
 
 Main().run()
