@@ -20,11 +20,12 @@ class Main(MDApp):
         self.history = []
         self.monitor = None
         self.window_bar_size = None
+        self.current_monitor = None
 
     def build(self):
         self.set_window()
 
-        Clock.schedule_interval(self.info, 1)
+        Clock.schedule_interval(self.resize, 0)
 
         self.manager = Manager()
         return self.manager
@@ -47,12 +48,9 @@ class Main(MDApp):
 
         self.monitor = monitor
 
-    def info(self, dt):
+    def resize(self, dt):
         monitor = self.get_current_monitor()
         size = Window.size
-
-        print(size)
-        print((monitor["width"], monitor["height"]))
 
         side = {*size}
 
@@ -73,14 +71,14 @@ class Main(MDApp):
 
         return difference <= tolerance
 
-    @staticmethod
-    def get_current_monitor():
+    def get_current_monitor(self):
         window_x, window_y = Window.left, Window.top
 
         for monitor in get_monitors():
             if (monitor.x <= window_x < monitor.x + monitor.width and
                     monitor.y <= window_y < monitor.y + monitor.height):
-                return {
+
+                self.current_monitor = {
                     "name": monitor.name,
                     "width": monitor.width,
                     "height": monitor.height,
@@ -88,7 +86,10 @@ class Main(MDApp):
                     "y": monitor.y
                 }
 
-        return None
+                return self.current_monitor
+
+        else:
+            return self.current_monitor
 
 
 Main().run()
