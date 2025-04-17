@@ -1,57 +1,18 @@
 <Grid>
     dimension: (0, 0)
+    life_color: (0, 0, 0, 1)
+    death_color: (1, 1, 1, 1)
+    lines_color: (0, 0, 0, .2)
     show_lines: True
-    cell_size: 25
+    lines_width: 1
+    cell_size: 250
 
     md_bg_color: 0, 0, 0, .2
 
     MDBoxLayout:
         orientation: 'vertical'
         pos_hint: {"center_x": .5, "center_y": .5}
+        md_bg_color: root.lines_color
 
         ScrollView:
-            size_hint: (1, 1)
-
-            GridLayout:
-                id: scroll_grid
-                cols: 1
-                size_hint: None, None
-                height: self.minimum_height
-                width: self.minimum_width
-                row_default_height: 40
-                spacing: 10
-                padding: 10
-
-                # Example items
-                Label:
-                    text: "Item 1"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 2"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 3"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 4"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 5"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 6"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 7"
-                    size_hint_y: None
-                    height: 40
-                Label:
-                    text: "Item 8"
-                    size_hint_y: None
-                    height: 40
+            id: ground

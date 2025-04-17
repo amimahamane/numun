@@ -3,4 +3,5 @@ kivymd==1.2.0
 
 # sudo apt install libgl1-mesa-glx libgl1-mesa-dri mesa-utils xserver-xorg-video-intel && sudo reboot
 
-screeninfo
+screeninfo==0.8.1
+msgpack==1.1.0
