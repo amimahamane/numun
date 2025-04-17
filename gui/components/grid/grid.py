@@ -1,3 +1,4 @@
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import DictProperty
 from kivy.uix.gridlayout import GridLayout
@@ -21,8 +22,7 @@ class Grid(MDFloatLayout):
     )
 
     def __init__(self, *args, **kwargs):
-        self.grids = {}
-        self.grid = None
+        self.content = None
         self.name = ""
         self._parameters = {}
 
@@ -30,15 +30,15 @@ class Grid(MDFloatLayout):
 
 
     def on_kv_post(self, base_widget):
-        self.set_grid()
+        Clock.schedule_once(self.set_content, 1)
 
 
-    def set_grid(self):
+    def set_content(self, dt):
         parameters_keys = Grid.parameters.get(self).keys()
         parameters = {}
 
-        self.grid = self.get_grid()
-        self.ids.ground.add_widget(self.grid)
+        self.content = self.get_content()
+        self.ids.ground.add_widget(self.content)
 
         for key in parameters_keys:
             parameters[key] = getattr(self, key)
@@ -46,22 +46,14 @@ class Grid(MDFloatLayout):
         self.parameters = parameters
 
 
-    def get_grid(self):
-        name = f"{"x".join([str(i) for i in self.dimension])}"
-        grids = self.grids
+    def get_content(self):
+        content = self.content or self.generate_content()
 
-        try:
-            grid = grids[name]
-
-        except KeyError:
-            grid = self.generate_grid()
-            self.grids[name] = grid
-
-        return grid
+        return content
 
 
-    def generate_grid(self):
-        grid = GridLayout(
+    def generate_content(self):
+        content = GridLayout(
             cols=self.dimension[0],
             rows=self.dimension[1],
             size_hint=(None, None),
@@ -69,8 +61,8 @@ class Grid(MDFloatLayout):
         )
 
         if self.show_lines:
-            grid.spacing = self.lines_width
-            grid.padding = self.lines_width
+            content.spacing = self.lines_width
+            content.padding = self.lines_width
 
         cells = [
             MDBoxLayout(
@@ -81,10 +73,10 @@ class Grid(MDFloatLayout):
         ]
 
         for cell in cells:
-            grid.add_widget(cell)
+            content.add_widget(cell)
 
         else:
-            return grid
+            return content
 
 
     def on_parameters(self, instance, value):
