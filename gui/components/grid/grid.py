@@ -94,6 +94,8 @@ class Grid(MDFloatLayout):
             print(value)
             print(_parameters)
 
-            # todo: update the gridK
+            # todo: when dimension changes, call set_grid
+            # todo: when others change, call update grid with a dict of parameters and values
+            # todo: update the grid
 
         self._parameters = _parameters
