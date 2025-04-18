@@ -2,6 +2,7 @@ import math
 from functools import partial
 
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import DictProperty
 from kivy.uix.gridlayout import GridLayout
@@ -30,11 +31,14 @@ class Grid(MDFloatLayout):
         self._parameters = {}
         self.new_cells = []
         self.new_cells_count = 0
+        self.minimum_cell_size = None
 
         super().__init__(*args, **kwargs)
 
 
     def on_kv_post(self, base_widget):
+        self.minimum_cell_size = (Window.width - ((self.cols + 1) * self.lines_width if self.show_lines else 0)) // self.cols
+
         Clock.schedule_once(self.set_content, 1)
 
 
@@ -61,11 +65,14 @@ class Grid(MDFloatLayout):
         cols = self.dimension[0]
         rows = self.dimension[1]
 
+        if self.minimum_cell_size > self.cell_size:
+            self.cell_size = self.minimum_cell_size
+
         content = GridLayout(
             cols=cols,
             rows=rows,
             size_hint=(None, None),
-            size=((self.cell_size * cols) + ((cols + 1) * self.show_lines), (self.cell_size * rows) + ((rows + 1) * self.show_lines))
+            size=((self.cell_size * cols) + ((cols + 1) * self.lines_width if self.show_lines else 0), (self.cell_size * rows) + ((rows + 1) * self.lines_width if self.show_lines else 0))
         )
 
         if self.show_lines:
