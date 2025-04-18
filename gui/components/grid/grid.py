@@ -29,6 +29,7 @@ class Grid(MDFloatLayout):
         self.name = ""
         self._parameters = {}
         self.new_cells = []
+        self.new_cells_count = 0
 
         super().__init__(*args, **kwargs)
 
@@ -95,16 +96,40 @@ class Grid(MDFloatLayout):
                     else:
                         return False
 
-                self.new_cells = [
-                    MDBoxLayout(
-                        size_hint=(None, None),
-                        size=(self.cell_size, self.cell_size),
-                        md_bg_color=self.life_color
-                    ) for i in range(count)
-                ]
+                def add_batch(_dt):
+                    if self.new_cells_count:
+                        if self.new_cells_count > 100:
+                            size = 100
+                            self.new_cells_count -= size
+
+                        else:
+                            size = self.new_cells_count
+                            self.new_cells_count = 0
+
+                        self.new_cells.extend(
+                            [
+                                MDBoxLayout(
+                                    size_hint=(None, None),
+                                    size=(self.cell_size, self.cell_size),
+                                    md_bg_color=self.life_color
+                                ) for j in range(size)
+                            ]
+                        )
+
+                        Clock.schedule_interval(
+                            add_next_cell,
+                            .0
+                        )
+
+                        return True
+
+                    else:
+                        return False
+
+                self.new_cells_count = count
 
                 Clock.schedule_interval(
-                    add_next_cell,
+                    add_batch,
                     .0
                 )
 
