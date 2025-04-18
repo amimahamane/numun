@@ -1,3 +1,6 @@
+import math
+from functools import partial
+
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import DictProperty
@@ -25,6 +28,7 @@ class Grid(MDFloatLayout):
         self.content = None
         self.name = ""
         self._parameters = {}
+        self.new_cells = []
 
         super().__init__(*args, **kwargs)
 
@@ -64,19 +68,68 @@ class Grid(MDFloatLayout):
             content.spacing = self.lines_width
             content.padding = self.lines_width
 
-        cells = [
-            MDBoxLayout(
-                size_hint=(None, None),
-                size=(self.cell_size, self.cell_size),
-                md_bg_color=self.life_color
-            ) for i in range(self.dimension[0] * self.dimension[1])
-        ]
+        Clock.schedule_once(
+            partial(
+                self.update_content,
+                {
+                    "dimension": self.dimension
+                }
+            ), 1
+        )
 
-        for cell in cells:
-            content.add_widget(cell)
+        return content
 
-        else:
-            return content
+
+    def update_content(self, updates, dt):
+        def update_dimension(content, dimension):
+            def add_cells(count):
+                def add_next_cell(_dt):
+                    if self.new_cells:
+                        content.add_widget(self.new_cells.pop(0))
+
+                        return True
+
+                    else:
+                        return False
+
+                self.new_cells = [
+                    MDBoxLayout(
+                        size_hint=(None, None),
+                        size=(self.cell_size, self.cell_size),
+                        md_bg_color=self.life_color
+                    ) for i in range(count)
+                ]
+
+                Clock.schedule_interval(
+                    add_next_cell,
+                    .0
+                )
+
+
+            def remove_cells(count):
+                pass
+
+
+            def update_ratio():
+                pass
+
+            current_size = len(self.content.children)
+            new_size = math.prod(dimension)
+            size_difference = abs(current_size - new_size)
+
+            if current_size < new_size:
+                add_cells(size_difference)
+
+            elif current_size > new_size:
+                remove_cells(size_difference)
+
+        for key, value in updates.items():
+            match key:
+                case "dimension":
+                    update_dimension(self.content, value)
+
+                case _:
+                    raise ValueError(f"{key} is missing in parameters so can not be updated")
 
 
     def on_parameters(self, instance, value):
