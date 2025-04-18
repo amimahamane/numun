@@ -57,11 +57,14 @@ class Grid(MDFloatLayout):
 
 
     def generate_content(self):
+        cols = self.dimension[0]
+        rows = self.dimension[1]
+
         content = GridLayout(
-            cols=self.dimension[0],
-            rows=self.dimension[1],
+            cols=cols,
+            rows=rows,
             size_hint=(None, None),
-            size=(self.cell_size * self.dimension[0], self.cell_size * self.dimension[1])
+            size=((self.cell_size * cols) + ((cols + 1) * self.show_lines), (self.cell_size * rows) + ((rows + 1) * self.show_lines))
         )
 
         if self.show_lines:
@@ -74,7 +77,7 @@ class Grid(MDFloatLayout):
                 {
                     "dimension": self.dimension
                 }
-            ), 1
+            ), .0
         )
 
         return content
@@ -105,6 +108,7 @@ class Grid(MDFloatLayout):
                     .0
                 )
 
+                # todo: add batch adding | batch size =
 
             def remove_cells(count):
                 pass
