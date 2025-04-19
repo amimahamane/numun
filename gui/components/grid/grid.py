@@ -10,6 +10,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.label import MDLabel
 
 Builder.load_file("components/grid/grid.kv")
 
@@ -47,9 +48,6 @@ class Grid(MDFloatLayout):
         self.minimum_cell_size = (Window.width - ((self.cols + 1) * self.lines_width if self.show_lines else 0)) // self.cols
         self.maximum_cell_size = (Window.width//16) - (self.lines_width * 9)
 
-        print(self.minimum_cell_size)
-        print(self.maximum_cell_size)
-
         Clock.schedule_once(self.set_content, 1)
 
 
@@ -78,6 +76,9 @@ class Grid(MDFloatLayout):
 
         if self.minimum_cell_size > self.cell_size:
             self.cell_size = self.minimum_cell_size
+
+        elif self.maximum_cell_size < self.cell_size:
+            self.cell_size = self.maximum_cell_size
 
         content = GridLayout(
             cols=cols,
@@ -171,14 +172,12 @@ class Grid(MDFloatLayout):
                 remove_cells(size_difference)
 
         def update_cell_size(content, direction):
-            scale_value = 10
+            scale_value = 1
 
             def scale(_id, _dt):
                 if self.cells[_id]:
                     cell = self.cells[_id].pop(0)
-                    cell.size = [dimension + scale_value for dimension in cell.size]
-
-                    print(cell)
+                    cell.size = (self.cell_size, self.cell_size)
 
                     return True
 
@@ -192,12 +191,14 @@ class Grid(MDFloatLayout):
             match direction:
                 case "+":
                     if self.cell_size + scale_value <= self.maximum_cell_size:
+                        print("+", self.cell_size)
                         self.cell_size += scale_value
 
                         to_scale = True
 
                 case "-":
                     if self.cell_size - scale_value >= self.minimum_cell_size:
+                        print("-", self.cell_size)
                         self.cell_size -= scale_value
 
                         to_scale = True
@@ -209,7 +210,10 @@ class Grid(MDFloatLayout):
                 scale_id = str(uuid.uuid4())
                 self.cells[scale_id] = [*reversed(content.children)]
 
-                self.size = (
+                print("=", self.cell_size)
+                print(self.minimum_cell_size, self.maximum_cell_size)
+
+                content.size = (
                     (self.cell_size * self.cols) + ((self.cols + 1) * self.lines_width if self.show_lines else 0),
                     (self.cell_size * self.rows) + ((self.rows + 1) * self.lines_width if self.show_lines else 0))
 
@@ -251,8 +255,6 @@ class Grid(MDFloatLayout):
     def on_touch_down(self, touch):
         if self.zoomable:
             if touch.button == 'scrollup':
-                print("out")
-
                 Clock.schedule_once(
                     partial(
                         self.update_content,
@@ -263,8 +265,6 @@ class Grid(MDFloatLayout):
                 )
 
             elif touch.button == 'scrolldown':
-                print("in")
-
                 Clock.schedule_once(
                     partial(
                         self.update_content,
