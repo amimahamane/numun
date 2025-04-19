@@ -1,4 +1,5 @@
 import math
+import uuid
 from functools import partial
 
 from kivy.clock import Clock
@@ -6,6 +7,7 @@ from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import DictProperty
 from kivy.uix.gridlayout import GridLayout
+from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 
@@ -32,12 +34,21 @@ class Grid(MDFloatLayout):
         self.new_cells = []
         self.new_cells_count = 0
         self.minimum_cell_size = None
+        self.maximum_cell_size = None
+        self.zoomable = False
+        self.cells = {}
 
         super().__init__(*args, **kwargs)
+
+        Window.bind(on_key_down=self._on_key_down)
 
 
     def on_kv_post(self, base_widget):
         self.minimum_cell_size = (Window.width - ((self.cols + 1) * self.lines_width if self.show_lines else 0)) // self.cols
+        self.maximum_cell_size = (Window.width//16) - (self.lines_width * 9)
+
+        print(self.minimum_cell_size)
+        print(self.maximum_cell_size)
 
         Clock.schedule_once(self.set_content, 1)
 
@@ -145,8 +156,8 @@ class Grid(MDFloatLayout):
             def remove_cells(count):
                 pass
 
-
             def update_ratio():
+                # todo: update self.rows and self.cols
                 pass
 
             current_size = len(self.content.children)
@@ -159,10 +170,65 @@ class Grid(MDFloatLayout):
             elif current_size > new_size:
                 remove_cells(size_difference)
 
+        def update_cell_size(content, direction):
+            scale_value = 10
+
+            def scale(_id, _dt):
+                if self.cells[_id]:
+                    cell = self.cells[_id].pop(0)
+                    cell.size = [dimension + scale_value for dimension in cell.size]
+
+                    print(cell)
+
+                    return True
+
+                else:
+                    del self.cells[_id]
+
+                    return False
+
+            to_scale = False
+
+            match direction:
+                case "+":
+                    if self.cell_size + scale_value <= self.maximum_cell_size:
+                        self.cell_size += scale_value
+
+                        to_scale = True
+
+                case "-":
+                    if self.cell_size - scale_value >= self.minimum_cell_size:
+                        self.cell_size -= scale_value
+
+                        to_scale = True
+
+                case _:
+                    raise ValueError(f"{direction} is missing in zoom parameters so can not be updated")
+
+            if to_scale:
+                scale_id = str(uuid.uuid4())
+                self.cells[scale_id] = [*reversed(content.children)]
+
+                self.size = (
+                    (self.cell_size * self.cols) + ((self.cols + 1) * self.lines_width if self.show_lines else 0),
+                    (self.cell_size * self.rows) + ((self.rows + 1) * self.lines_width if self.show_lines else 0))
+
+                Clock.schedule_interval(
+                    partial(
+                        scale,
+                        scale_id
+                    ),
+                    .0
+                )
+
+
         for key, value in updates.items():
             match key:
                 case "dimension":
                     update_dimension(self.content, value)
+
+                case "cell_size":
+                    update_cell_size(self.content, value)
 
                 case _:
                     raise ValueError(f"{key} is missing in parameters so can not be updated")
@@ -180,3 +246,42 @@ class Grid(MDFloatLayout):
             # todo: update the grid
 
         self._parameters = _parameters
+
+
+    def on_touch_down(self, touch):
+        if self.zoomable:
+            if touch.button == 'scrollup':
+                print("out")
+
+                Clock.schedule_once(
+                    partial(
+                        self.update_content,
+                        {
+                            "cell_size": "-"
+                        }
+                    )
+                )
+
+            elif touch.button == 'scrolldown':
+                print("in")
+
+                Clock.schedule_once(
+                    partial(
+                        self.update_content,
+                        {
+                            "cell_size": "+"
+                        }
+                    )
+                )
+
+            return True
+
+        return super().on_touch_down(touch)
+
+
+    def _on_key_down(self, window, key, scancode, codepoint, modifiers):
+        key_string = Window._system_keyboard.keycode_to_string(key)
+
+        if key_string == 'z' and 'ctrl' in modifiers:
+            self.zoomable = not self.zoomable
+            toast(f"Zoom : {self.zoomable}", duration=2.5)
