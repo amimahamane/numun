@@ -12,6 +12,8 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.label import MDLabel
 
+from gui.components.cell.cell import Cell
+
 Builder.load_file("components/grid/grid.kv")
 
 
@@ -128,10 +130,9 @@ class Grid(MDFloatLayout):
 
                         self.new_cells.extend(
                             [
-                                MDBoxLayout(
-                                    size_hint=(None, None),
+                                Cell(
                                     size=(self.cell_size, self.cell_size),
-                                    md_bg_color=self.life_color
+                                    color=self.life_color
                                 ) for j in range(size)
                             ]
                         )
