@@ -132,7 +132,9 @@ class Grid(MDFloatLayout):
                             [
                                 Cell(
                                     size=(self.cell_size, self.cell_size),
-                                    color=self.life_color
+                                    death_color=self.death_color,
+                                    life_color=self.life_color,
+                                    alive=False
                                 ) for j in range(size)
                             ]
                         )

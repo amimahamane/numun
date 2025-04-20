@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from kivy import Config
 from kivy.clock import Clock
 from screeninfo import get_monitors
 from kivy.core.window import Window
@@ -45,6 +47,8 @@ class Main(MDApp):
         Window.size = (height, height)
         Window.top = 0
         Window.left = (width // 2) - (height // 2)
+
+        Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
         self.monitor = monitor
 
