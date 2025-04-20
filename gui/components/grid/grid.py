@@ -176,50 +176,6 @@ class Grid(MDFloatLayout):
         def update_cell_size(content, direction):
             scale_value = 1
 
-            def scale_next_cell(_scale_id, _batch_id, _dt):
-                if self.cells[_scale_id][_batch_id]:
-                    cell = self.cells[_scale_id][_batch_id].pop(0)
-                    cell.size = (self.cell_size, self.cell_size)
-
-                    return True
-
-                else:
-                    del self.cells[_scale_id][_batch_id]
-
-                    return False
-
-            def scale_batch(_id, _dt):
-                size = 100
-
-                if self.cells[scale_id]["count"]:
-                    if self.cells[scale_id]["count"] > size:
-                        self.cells[scale_id]["count"] -= 100
-
-                    else:
-                        size = self.cells[scale_id]["count"]
-                        self.cells[scale_id]["count"] = 0
-
-                    print(size)
-                    batch_id = str(uuid.uuid4())
-
-                    print(batch_id)
-
-                    batch = [self.cells[scale_id]["cells"].pop(0) for l in range(size)]
-                    self.cells[scale_id][batch_id] = batch
-
-                    Clock.schedule_interval(
-                        partial(
-                            scale_next_cell,
-                            scale_id, batch_id
-                        ),
-                        .0
-                    )
-
-                    return True
-
-                else:
-                    return False
-
             to_scale = False
 
             match direction:
@@ -241,27 +197,9 @@ class Grid(MDFloatLayout):
                     raise ValueError(f"{direction} is missing in zoom parameters so can not be updated")
 
             if to_scale:
-                scale_id = str(uuid.uuid4())
-                self.cells[scale_id] = {
-                    "cells": [*reversed(content.children)],
-                }
-                self.cells[scale_id]["count"] = len(self.cells[scale_id]["cells"])
-
-                print("=", self.cell_size)
-                print(self.minimum_cell_size, self.maximum_cell_size)
-
                 content.size = (
                     (self.cell_size * self.cols) + ((self.cols + 1) * self.lines_width if self.show_lines else 0),
                     (self.cell_size * self.rows) + ((self.rows + 1) * self.lines_width if self.show_lines else 0))
-
-                Clock.schedule_interval(
-                    partial(
-                        scale_batch,
-                        scale_id
-                    ),
-                    .0
-                )
-
 
         for key, value in updates.items():
             match key:
