@@ -1,9 +1,8 @@
 import random
 
-from kivy.lang import Builder
+from kivymd.toast import toast
 from kivymd.uix.boxlayout import MDBoxLayout
-
-Builder.load_file("components/grid/grid.kv")
+from kivymd.uix.label import MDLabel
 
 
 class Cell(MDBoxLayout):
@@ -30,17 +29,22 @@ class Cell(MDBoxLayout):
         self.md_bg_color = self.life_color if self.alive else self.death_color
 
 
+
     def on_touch_down(self, touch):
         if 'button' in touch.profile:
             if self.collide_point(*touch.pos):
                 if touch.button == 'left':
-                    print("🖱️ Left click detected at", touch.pos)
                     self.alive = not self.alive
                     self.md_bg_color = self.life_color if self.alive else self.death_color
 
-
                 elif touch.button == 'right':
-                    print("🖱️ Right click detected at", touch.pos)
+                    width, height = self.size
+                    pos_x, pos_y = self.pos
+
+                    x = int((pos_x // width) + 1)
+                    y = int(abs((pos_y // height) - self.parent.rows))
+
+                    toast(f"Position : {x} x {y}", duration=1.5)
 
         return super().on_touch_down(touch)
 
