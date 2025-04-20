@@ -103,7 +103,7 @@ class Grid(MDFloatLayout):
         return content
 
 
-    def update_content(self, updates, dt):
+    def update_content(self, updates, dt=.0):
         def update_dimension(content, dimension):
             def add_cells(count):
                 def add_next_cell(_dt):
@@ -116,9 +116,10 @@ class Grid(MDFloatLayout):
                         return False
 
                 def add_batch(_dt):
+                    size = 100
+
                     if self.new_cells_count:
-                        if self.new_cells_count > 100:
-                            size = 100
+                        if self.new_cells_count > size:
                             self.new_cells_count -= size
 
                         else:
@@ -174,16 +175,48 @@ class Grid(MDFloatLayout):
         def update_cell_size(content, direction):
             scale_value = 1
 
-            def scale(_id, _dt):
-                if self.cells[_id]:
-                    cell = self.cells[_id].pop(0)
+            def scale_next_cell(_scale_id, _batch_id, _dt):
+                if self.cells[_scale_id][_batch_id]:
+                    cell = self.cells[_scale_id][_batch_id].pop(0)
                     cell.size = (self.cell_size, self.cell_size)
 
                     return True
 
                 else:
-                    del self.cells[_id]
+                    del self.cells[_scale_id][_batch_id]
 
+                    return False
+
+            def scale_batch(_id, _dt):
+                size = 100
+
+                if self.cells[scale_id]["count"]:
+                    if self.cells[scale_id]["count"] > size:
+                        self.cells[scale_id]["count"] -= 100
+
+                    else:
+                        size = self.cells[scale_id]["count"]
+                        self.cells[scale_id]["count"] = 0
+
+                    print(size)
+                    batch_id = str(uuid.uuid4())
+
+                    print(batch_id)
+
+                    batch = [self.cells[scale_id]["cells"].pop(0) for l in range(size)]
+                    self.cells[scale_id][batch_id] = batch
+
+                    Clock.schedule_interval(
+                        partial(
+                            scale_next_cell,
+                            scale_id, batch_id
+                        ),
+                        .0
+                    )
+
+                    return True
+
+                else:
                     return False
 
             to_scale = False
@@ -208,7 +241,10 @@ class Grid(MDFloatLayout):
 
             if to_scale:
                 scale_id = str(uuid.uuid4())
-                self.cells[scale_id] = [*reversed(content.children)]
+                self.cells[scale_id] = {
+                    "cells": [*reversed(content.children)],
+                }
+                self.cells[scale_id]["count"] = len(self.cells[scale_id]["cells"])
 
                 print("=", self.cell_size)
                 print(self.minimum_cell_size, self.maximum_cell_size)
@@ -219,7 +255,7 @@ class Grid(MDFloatLayout):
 
                 Clock.schedule_interval(
                     partial(
-                        scale,
+                        scale_batch,
                         scale_id
                     ),
                     .0
@@ -282,6 +318,28 @@ class Grid(MDFloatLayout):
     def _on_key_down(self, window, key, scancode, codepoint, modifiers):
         key_string = Window._system_keyboard.keycode_to_string(key)
 
+        print(key_string, "ctrl" in modifiers)
+
         if key_string == 'z' and 'ctrl' in modifiers:
             self.zoomable = not self.zoomable
             toast(f"Zoom : {self.zoomable}", duration=2.5)
+
+        elif key_string == '6' and 'ctrl' in modifiers:
+            Clock.schedule_once(
+                partial(
+                    self.update_content,
+                    {
+                        "cell_size": "-"
+                    }
+                )
+            )
+
+        elif key_string == '=' and 'ctrl' in modifiers:
+            Clock.schedule_once(
+                partial(
+                    self.update_content,
+                    {
+                        "cell_size": "+"
+                    }
+                )
+            )
